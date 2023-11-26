@@ -1,0 +1,19 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5a070bf3c88e5a04083b8e860ce43273, type: 3}
+  m_Name: monster 2
+  m_EditorClassIdentifier: 
+  EnemyPicture: {fileID: -1689904778, guid: bbda5916ddd3f8942be0d8bccdd75752, type: 3}
+  Hp: 1000
+  Damage: 20
+  StartRound: 1
+  Round: 2
