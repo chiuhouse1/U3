@@ -62,6 +62,8 @@ public class TileBoard : MonoBehaviour
 
     public float Touch_buffer;
 
+    bool point = false;
+
     private void Awake()
     {
         grid = GetComponentInChildren<TileGrid>();
@@ -145,7 +147,7 @@ public class TileBoard : MonoBehaviour
         if (hit.collider != null)
         {
             // 输出击中物体的名称
-            //Debug.Log("Clicked on: " + hit.collider.gameObject.name);
+            Debug.Log("Clicked on: " + hit.collider.gameObject.name);
 
             return hit.collider.gameObject;
 
@@ -160,14 +162,20 @@ public class TileBoard : MonoBehaviour
     // 用于鼠标输入检测
     private void MouseInput()
     {
-        if (Input.GetMouseButtonDown(0) && MouseClick() == board)
+        if (Input.GetMouseButtonDown(0) && MouseClick() == board && !point)
         {
+
             S_Pos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+
+            point = true;
         }
 
-        if (Input.GetMouseButtonUp(0))
+        if (Input.GetMouseButtonUp(0) && point)
         {
+            print("321");
             Vector2 E_Pos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
+
+            point = false;
 
             // 检测手指滑动方向
             Define.Direction mDirection = HandDirection(S_Pos, E_Pos);
