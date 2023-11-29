@@ -22,6 +22,7 @@ public class TileBoard : MonoBehaviour
 {
     public GameManager GameManager;
     public PopBoxController popBoxController;
+    public HPBarController hPBarController;
     public TextMeshProUGUI roundtext;
     public TextMeshProUGUI showlevel;
     public Attack attack;
@@ -164,7 +165,7 @@ public class TileBoard : MonoBehaviour
             S_Pos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
         }
 
-        if (Input.GetMouseButtonUp(0) && MouseClick() == board)
+        if (Input.GetMouseButtonUp(0))
         {
             Vector2 E_Pos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
@@ -177,14 +178,14 @@ public class TileBoard : MonoBehaviour
     // 用于移动设备触摸输入检测
     private void MobileInput()
     {
-        if (Input.touchCount <= 0 && MouseClick() == board)
+        if (Input.touchCount <= 0)
             return;
 
         // 一个手指触碰屏幕
-        if (Input.touchCount == 1 && MouseClick() == board)
+        if (Input.touchCount == 1)
         {
             // 开始触碰
-            if (Input.touches[0].phase == TouchPhase.Began)
+            if (Input.touches[0].phase == TouchPhase.Began && MouseClick() == board)
             {
                 Debug.Log("Began");
                 // 记录触碰位置
@@ -381,7 +382,7 @@ public class TileBoard : MonoBehaviour
             popBoxController.showPop_Transparency(FullBoardPopScreen);
         }
 
-        foreach (var tile in tiles)
+        foreach (var tile in tiles)     //
         {
             if (tile.number == 1 || tile.number == 5)
             {
@@ -404,21 +405,64 @@ public class TileBoard : MonoBehaviour
 
         movetimes--;
 
+        StartCoroutine(MovetimesSelect());
+    }
+
+    IEnumerator MovetimesSelect()
+    {
         if (movetimes == 0)     //移動回合結束
         {
-            StartCoroutine(HPFlow(MonsterHP, MonsterHPAni, attack.DamageCalculation(swordcount, axcount, spearcount, bowcount, bonus), waiting));
+            StartCoroutine(hPBarController.HPFlow(MonsterHP, MonsterHPAni, attack.DamageCalculation(swordcount, axcount, spearcount, bowcount, bonus)));
+
+            yield return new WaitForSeconds(1);
+
+            swordcount = 0;
+            axcount = 0;
+            spearcount = 0;
+            bowcount = 0;
+            bonus = 1;
+
+            movetimes = 3;
+
+            round -= 1;
+            roundtext.text = round.ToString();
+
+            if (MonsterHP.value == 0)     //怪物死亡
+            {
+                GameManager.Level++;
+                if (GameManager.Level == enemyStates.Length)
+                {
+                    GameManager.Level = 0;
+                }
+                CreateEnemy(GameManager.Level);
+
+                movetimes = 3;
+            }
+            else if (round == 0)     //怪物回合倒數結束
+            {
+                StartCoroutine(hPBarController.HPFlow(PlayerHP, PlayerHPAni, enemy.damage));
+
+                yield return new WaitForSeconds(1);
+
+                round = enemy.round;
+                roundtext.text = round.ToString();
+            }
+
+            waiting = false;
+
+        }
+        else
+        {
+            waiting = false;
         }
 
         if (tiles.Count != grid.size)
         {
             CreateTile();
         }
-        Debug.Log(movetimes);
 
-        if (movetimes != 0)
-        {
-            waiting = false;
-        }
+        Debug.Log(movetimes);
+        yield return null;
     }
 
     bool CheckForFullpage()     //檢測是否無法動彈
@@ -467,76 +511,4 @@ public class TileBoard : MonoBehaviour
             tile.FullpageAni();
         }
     }
-
-    IEnumerator HPFlow(Slider hpbar, Slider hpbarani, int hurt, bool waiting)
-    {
-        waiting = true;
-
-        hpbar.value -= hurt;
-        if (hpbar.value < 0)
-        {
-            hpbar.value = 0;
-        }
-
-        float nowhp = hpbarani.value;
-        float newhp = hpbarani.value - hurt;
-        if (newhp < 0)
-        {
-            newhp = 0;
-        }
-
-        float i = 0;
-        while (i < 1)
-        {
-            i += Time.deltaTime;
-            if (i >= 1)
-            {
-                i = 1;
-            }
-            float t = i / 1;
-            hpbarani.value = Mathf.Lerp(nowhp, newhp, t);
-            yield return new WaitForFixedUpdate();
-        }
-
-        yield return StartCoroutine(AfterAttack());
-    }
-
-    IEnumerator AfterAttack()
-    {
-
-        swordcount = 0;
-        axcount = 0;
-        spearcount = 0;
-        bowcount = 0;
-        bonus = 1;
-
-        movetimes = 3;
-
-        round -= 1;
-        roundtext.text = round.ToString();
-
-        if (MonsterHP.value == 0)     //怪物死亡
-        {
-            GameManager.Level++;
-            if (GameManager.Level == enemyStates.Length)
-            {
-                GameManager.Level = 0;
-            }
-            CreateEnemy(GameManager.Level);
-
-            movetimes = 3;
-        }
-        else if (round == 0)     //怪物回合倒數結束
-        {
-            StartCoroutine(HPFlow(PlayerHP, PlayerHPAni, enemy.damage, waiting));
-
-            round = enemy.round;
-            roundtext.text = round.ToString();
-        }
-
-        waiting = false;
-
-        yield return null;
-    }
-
 }

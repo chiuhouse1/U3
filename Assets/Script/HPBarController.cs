@@ -6,23 +6,11 @@ using UnityEngine.UI;
 
 public class HPBarController : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    public TileBoard tileBoard;
+
+    public IEnumerator HPFlow(Slider hpbar, Slider hpbarani, int hurt)
     {
-
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-
-
-    public IEnumerator HPFlow(Slider hpbar, Slider hpbarani, int hurt, bool waiting)
-    {
-        waiting = true;
+        tileBoard.waiting = true;
 
         hpbar.value -= hurt;
         if (hpbar.value < 0)

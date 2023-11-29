@@ -233,6 +233,7 @@ GameObject:
   - component: {fileID: 78571642}
   - component: {fileID: 78571641}
   - component: {fileID: 78571643}
+  - component: {fileID: 78571644}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -323,6 +324,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   GameManager: {fileID: 1285866222}
   popBoxController: {fileID: 1121598891}
+  hPBarController: {fileID: 78571644}
   roundtext: {fileID: 1934711439}
   showlevel: {fileID: 609460905}
   attack: {fileID: 78571643}
@@ -417,6 +419,19 @@ MonoBehaviour:
   Ax: 5
   Spear: 10
   Bow: 50
+--- !u!114 &78571644
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78571638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e951d759b4be5dd48bfd5426c0b22380, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  tileBoard: {fileID: 78571641}
 --- !u!1 &96700273
 GameObject:
   m_ObjectHideFlags: 0
