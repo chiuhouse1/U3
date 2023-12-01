@@ -1,6 +1,6 @@
 ﻿using System.Collections;
 using UnityEngine;
-
+using UnityEngine.EventSystems;
 public class Tile : MonoBehaviour
 {
     public WeaponState state { get; private set; }

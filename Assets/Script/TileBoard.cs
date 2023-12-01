@@ -23,6 +23,8 @@ public class TileBoard : MonoBehaviour
     public GameManager GameManager;
     public PopBoxController popBoxController;
     public HPBarController hPBarController;
+    public Skill skill;
+
     public TextMeshProUGUI roundtext;
     public TextMeshProUGUI showlevel;
     public Attack attack;
@@ -41,12 +43,13 @@ public class TileBoard : MonoBehaviour
 
     int round;
 
+    GameObject BonusTileCheck;
+
     public Tile tilePrefab;
     public Enemy enemyPrefab;
     public WeaponState[] weaponStates;
     public EnemyState[] enemyStates;
 
-    public GameObject board;
     public GameObject FullBoardPopScreen;
     public Slider PlayerHP;
     public Slider PlayerHPAni;
@@ -135,7 +138,7 @@ public class TileBoard : MonoBehaviour
         }
     }
 
-    private GameObject MouseClick()
+    public bool MouseClick(int select)
     {
         // 将鼠标位置转换为2D世界坐标
         Vector2 clickPosition = Camera.main.ScreenToWorldPoint(Input.mousePosition);
@@ -149,33 +152,55 @@ public class TileBoard : MonoBehaviour
             // 输出击中物体的名称
             Debug.Log("Clicked on: " + hit.collider.gameObject.name);
 
-            return hit.collider.gameObject;
+            if (hit.collider.gameObject.GetComponent<TileBoard>() && select == 1)
+            {
+                return true;
+            }
+            if (hit.collider.gameObject.GetComponent<Tile>())
+            {
+                if (select == 1)
+                {
+                    BonusTileCheck = hit.collider.gameObject;
 
-            // 在这里可以添加处理被点击物体的逻辑
+                    return true;
+                }
+                else if (hit.collider.gameObject == BonusTileCheck)
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
         else
         {
-            return null;
+            return false;
         }
     }
 
     // 用于鼠标输入检测
     private void MouseInput()
     {
-        if (Input.GetMouseButtonDown(0) && MouseClick() == board && !point)
+        if (Input.GetMouseButtonDown(0) && MouseClick(1) && !point)
         {
-
             S_Pos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
             point = true;
+
+            skill.OnClickDown();
         }
 
         if (Input.GetMouseButtonUp(0) && point)
         {
-            print("321");
+
             Vector2 E_Pos = new Vector2(Input.mousePosition.x, Input.mousePosition.y);
 
             point = false;
+
+            if (MouseClick(0))
+            {
+                skill.OnClickUp();
+            }
 
             // 检测手指滑动方向
             Define.Direction mDirection = HandDirection(S_Pos, E_Pos);
@@ -193,11 +218,13 @@ public class TileBoard : MonoBehaviour
         if (Input.touchCount == 1)
         {
             // 开始触碰
-            if (Input.touches[0].phase == TouchPhase.Began && MouseClick() == board)
+            if (Input.touches[0].phase == TouchPhase.Began && MouseClick(1) && !point)
             {
                 Debug.Log("Began");
                 // 记录触碰位置
                 S_Pos = Input.touches[0].position;
+
+                point = true;
             }
             else if (Input.touches[0].phase == TouchPhase.Moved)
             {
@@ -205,10 +232,12 @@ public class TileBoard : MonoBehaviour
             }
 
             // 手指离开屏幕
-            if (Input.touches[0].phase == TouchPhase.Ended || Input.touches[0].phase == TouchPhase.Canceled)
+            if (Input.touches[0].phase == TouchPhase.Ended || Input.touches[0].phase == TouchPhase.Canceled && point)
             {
                 Debug.Log("Ended");
                 Vector2 E_Pos = Input.touches[0].position;
+
+                point = false;
 
                 // 检测手指滑动方向
                 Define.Direction mDirection = HandDirection(S_Pos, E_Pos);

@@ -234,6 +234,7 @@ GameObject:
   - component: {fileID: 78571641}
   - component: {fileID: 78571643}
   - component: {fileID: 78571644}
+  - component: {fileID: 78571645}
   m_Layer: 0
   m_Name: Board
   m_TagString: Untagged
@@ -325,6 +326,7 @@ MonoBehaviour:
   GameManager: {fileID: 1285866222}
   popBoxController: {fileID: 1121598891}
   hPBarController: {fileID: 78571644}
+  skill: {fileID: 78571645}
   roundtext: {fileID: 1934711439}
   showlevel: {fileID: 609460905}
   attack: {fileID: 78571643}
@@ -348,7 +350,6 @@ MonoBehaviour:
   - {fileID: 11400000, guid: a7f9ce39a9fe8a44dae3365532ab697d, type: 2}
   - {fileID: 11400000, guid: a3f88beab753d3b429f9334ac6645087, type: 2}
   - {fileID: 11400000, guid: dbb2135f9d40665438a2efb18e9adbbd, type: 2}
-  board: {fileID: 78571638}
   FullBoardPopScreen: {fileID: 1804992724}
   PlayerHP: {fileID: 1480074116}
   PlayerHPAni: {fileID: 2041564741}
@@ -432,6 +433,18 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   tileBoard: {fileID: 78571641}
+--- !u!114 &78571645
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 78571638}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b73d9bf7b372ba469c29dee1e2cd729, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &96700273
 GameObject:
   m_ObjectHideFlags: 0
