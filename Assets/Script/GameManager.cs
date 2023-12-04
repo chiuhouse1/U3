@@ -4,12 +4,15 @@ using UnityEngine;
 public class GameManager : MonoBehaviour
 {
     public TileBoard board;
+    public HealingWall healingwall;
     public int Level = 0;
 
     private void Start()
     {
         NewGame();
         board.CreateEnemy(Level);
+        healingwall.MakeWall();
+        healingwall.MakeWall();
     }
 
     public void NewGame()       //¨ê·sª©­±

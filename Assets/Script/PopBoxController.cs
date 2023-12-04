@@ -45,6 +45,7 @@ public class PopBoxController : MonoBehaviour
         {
             StopCoroutine(c);
         }
+
         StartCoroutine(Pop_Transparency(g, Color.white, 2));
     }
 
@@ -54,6 +55,7 @@ public class PopBoxController : MonoBehaviour
         {
             StopCoroutine(c);
         }
+
         StartCoroutine(Pop_Transparency(g, Color.clear, 2));
     }
 

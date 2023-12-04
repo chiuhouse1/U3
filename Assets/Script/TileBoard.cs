@@ -24,9 +24,10 @@ public class TileBoard : MonoBehaviour
     public PopBoxController popBoxController;
     public HPBarController hPBarController;
     public Skill skill;
+    public HealingWall healingwall;
 
     public TextMeshProUGUI roundtext;
-    public TextMeshProUGUI showlevel;
+    public TextMeshProUGUI MoveTimes;
     public Attack attack;
 
     public int playerHP;
@@ -41,6 +42,8 @@ public class TileBoard : MonoBehaviour
     int bonus = 1;
     int movetimes = 3;
 
+    int direction;
+
     int round;
 
     GameObject BonusTileCheck;
@@ -51,6 +54,9 @@ public class TileBoard : MonoBehaviour
     public EnemyState[] enemyStates;
 
     public GameObject FullBoardPopScreen;
+    public GameObject NoBloodPopScreen;
+    public GameObject NoBloodPopScreenBack;
+
     public Slider PlayerHP;
     public Slider PlayerHPAni;
     public Slider MonsterArmor;
@@ -76,6 +82,8 @@ public class TileBoard : MonoBehaviour
         PlayerHP.value = playerHP;
         PlayerHPAni.maxValue = playerHP;
         PlayerHPAni.value = playerHP;
+
+        MoveTimes.text = movetimes.ToString();
     }
 
     public void ClearBoard()        //清空版面
@@ -93,7 +101,7 @@ public class TileBoard : MonoBehaviour
         tiles.Clear();
     }
 
-    public void CreateTile()        //生成方塊
+    public void CreateTile()        //生成傷害方塊
     {
         int newtile = Random.Range(0, 4);
         if (newtile != 0)
@@ -111,6 +119,14 @@ public class TileBoard : MonoBehaviour
         tiles.Add(tile);
     }
 
+    public void CreateHealingTile()        //生成回復方塊
+    {
+        Tile tile = Instantiate(tilePrefab, grid.transform);
+        tile.SetState(weaponStates[8]);
+        tile.Spawn(grid.GetRandomEmptyCell());
+        tiles.Add(tile);
+    }
+
     public void CreateEnemy(int level)        //生成敵人
     {
         if (enemy != null)
@@ -122,7 +138,6 @@ public class TileBoard : MonoBehaviour
         enemy = monster.GetComponent<Enemy>();
         round = enemy.round;
         roundtext.text = round.ToString();
-        showlevel.text = "Level     " + (level + 1);
     }
 
     // 记录手指触碰位置
@@ -256,15 +271,19 @@ public class TileBoard : MonoBehaviour
         {
             if (StartPos.x - Touch_buffer > EndPos.x)
             {
-                // 手指向左滑动
+                // 手指向左滑动           3
                 mDirection = Define.Direction.Left;
+
+                direction = 3;
 
                 Move(Vector2Int.left, 1, 1, 0, 1);
             }
             else if (StartPos.x + Touch_buffer < EndPos.x)
             {
-                // 手指向右滑动
+                // 手指向右滑动           1
                 mDirection = Define.Direction.Right;
+
+                direction = 1;
 
                 Move(Vector2Int.right, grid.width - 2, -1, 0, 1);
             }
@@ -277,15 +296,19 @@ public class TileBoard : MonoBehaviour
         {
             if (StartPos.y - Touch_buffer > EndPos.y)
             {
-                // 手指向下滑动
+                // 手指向下滑动           2
                 mDirection = Define.Direction.Down;
+
+                direction = 2;
 
                 Move(Vector2Int.down, 0, 1, grid.height - 2, -1);
             }
             else if (StartPos.y + Touch_buffer < EndPos.y)
             {
-                // 手指向上滑动
+                // 手指向上滑动           0
                 mDirection = Define.Direction.Up;
+
+                direction = 0;
 
                 Move(Vector2Int.up, 0, 1, 1, 1);
             }
@@ -355,7 +378,8 @@ public class TileBoard : MonoBehaviour
 
     bool CanMerge(Tile a, Tile b)       //檢測是否能合併
     {
-        return (a.state.Number == b.state.Number || a.state.Number == b.state.Number + 4 || a.state.Number + 4 == b.state.Number) && !b.locked;
+        return (a.state.Number == b.state.Number || a.state.Number == b.state.Number + 4 || a.state.Number + 4 == b.state.Number
+            || a.state.Number == 9 || b.state.Number == 9 || a.state.Number == 10 || b.state.Number == 10) && !b.locked;
     }
 
     void MergeTiles(Tile a, Tile b)     //合併方塊
@@ -364,29 +388,108 @@ public class TileBoard : MonoBehaviour
         a.Merge(b.cell);
 
         WeaponState maxstate;
+        WeaponState minstate;
         if (a.state.Number >= b.state.Number)
         {
             maxstate = a.state;
+            minstate = b.state;
         }
         else
         {
             maxstate = b.state;
+            minstate = a.state;
         }
 
         int index = IndexOf(maxstate) + 1;
-        if (index > weaponStates.Length - 1)
+
+        if (maxstate.Number == 9 && a.state.Number == b.state.Number)       //心符石相合
+        {
+            index = 9;
+        }
+        else if (maxstate.Number == 9 || maxstate.Number == 10)     //心符石於其他符石合成
+        {
+            if (minstate.Number == 1)
+            {
+                index = 0;
+
+                if (maxstate.Number == 9)
+                {
+                    StartCoroutine(hPBarController.HPFlow(PlayerHP, PlayerHPAni, -attack.DamageCalculation(1, 0, 0, 0, 1)));
+                }
+                else
+                {
+                    StartCoroutine(hPBarController.HPFlow(PlayerHP, PlayerHPAni, -2 * (attack.DamageCalculation(1, 0, 0, 0, 1))));
+                }
+            }
+            else if (minstate.Number == 5)
+            {
+                index = 4;
+
+                if (maxstate.Number == 9)
+                {
+                    StartCoroutine(hPBarController.HPFlow(PlayerHP, PlayerHPAni, -attack.DamageCalculation(1, 0, 0, 0, 1)));
+                }
+                else
+                {
+                    StartCoroutine(hPBarController.HPFlow(PlayerHP, PlayerHPAni, -2 * (attack.DamageCalculation(1, 0, 0, 0, 1))));
+                }
+            }
+            else
+            {
+                index = minstate.Number - 2;
+
+                if (minstate.Number == 1 || minstate.Number == 5)
+                {
+                    swordcount++;
+                }
+                else if (minstate.Number == 2 || minstate.Number == 6)
+                {
+                    axcount++;
+                }
+                else if (minstate.Number == 3 || minstate.Number == 7)
+                {
+                    spearcount++;
+                }
+                else if (minstate.Number == 4 || minstate.Number == 8)
+                {
+                    bowcount++;
+                }
+
+                if (maxstate.Number == 9)
+                {
+                    StartCoroutine(hPBarController.HPFlow(PlayerHP, PlayerHPAni, -attack.DamageCalculation(swordcount, axcount, spearcount, bowcount, 1)));
+                }
+                else
+                {
+                    StartCoroutine(hPBarController.HPFlow(PlayerHP, PlayerHPAni, -2 * (attack.DamageCalculation(swordcount, axcount, spearcount, bowcount, 1))));
+                }
+
+                swordcount = 0;
+                axcount = 0;
+                spearcount = 0;
+                bowcount = 0;
+            }
+        }
+        else if (index > 7)
         {
             index = 0;
         }
 
-        b.SetState(weaponStates[index]);
-        if (index < 4)
+        b.SetState(weaponStates[index]);        //設置合成方塊
+
+        if (index < 4)                      //倍率計算
         {
-            bonus = index + 1;
+            if (bonus < index + 1)
+            {
+                bonus = index + 1;
+            }
         }
         else if (index >= 4)
         {
-            bonus = index - 3;
+            if (bonus < index - 3)
+            {
+                bonus = index - 3;
+            }
         }
     }
 
@@ -442,11 +545,15 @@ public class TileBoard : MonoBehaviour
 
         movetimes--;
 
+        MoveTimes.text = movetimes.ToString();
+
         StartCoroutine(MovetimesSelect());
     }
 
     IEnumerator MovetimesSelect()
     {
+        healingwall.HealingWallRoundCount(direction);
+
         if (movetimes == 0)     //移動回合結束
         {
             StartCoroutine(hPBarController.HPFlow(MonsterHP, MonsterHPAni, attack.DamageCalculation(swordcount, axcount, spearcount, bowcount, bonus)));
@@ -493,13 +600,18 @@ public class TileBoard : MonoBehaviour
             waiting = false;
         }
 
-        if (tiles.Count != grid.size)
+        if (tiles.Count != grid.size)       //生成方塊
         {
             CreateTile();
         }
 
-        Debug.Log(movetimes);
-        yield return null;
+        MoveTimes.text = movetimes.ToString();
+
+        if (PlayerHP.value == 0)
+        {
+            popBoxController.showPop_Transparency(NoBloodPopScreenBack);
+            popBoxController.showPop_Transparency(NoBloodPopScreen);
+        }
     }
 
     bool CheckForFullpage()     //檢測是否無法動彈
@@ -547,5 +659,11 @@ public class TileBoard : MonoBehaviour
         {
             tile.FullpageAni();
         }
+    }
+
+    public void Anabiosis()
+    {
+        PlayerHP.value = playerHP;
+        PlayerHPAni.value = playerHP;
     }
 }
